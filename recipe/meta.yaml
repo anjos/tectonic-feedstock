@@ -15,9 +15,10 @@ source:
   patches:
     - pr-1202-fix-use-cxx-17.patch
     - winzip.patch  # [win]
+    - fix-autoref.patch
 
 build:
-  number: 3
+  number: 4
 
 requirements:
   build:
