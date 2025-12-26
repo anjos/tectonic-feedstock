@@ -12,10 +12,9 @@ source:
   sha256: ${{ sha256 }}
   patches:
     - pr-1202-fix-use-cxx-17.patch
-    - if: win
-      then:
-        - winzip.patch
     - fix-autoref.patch
+    - if: win
+      then: winzip.patch
 
 build:
   number: 5
