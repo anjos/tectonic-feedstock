@@ -21,6 +21,13 @@ else
     if [[ "${CONDA_BUILD_CROSS_COMPILATION}" != "1" ]]; then
         LD_LIBRARY_PATH=$PREFIX/lib RUSTDOCFLAGS="-C linker=$CC" cargo test --release --features external-harfbuzz
     fi
+
+    # Resolve linking issues on ppc64le while cross-compiling
+    if [[ "${target_platform}" == "linux-ppc64le" ]]; then
+        CFLAGS="$(echo $CFLAGS | sed 's/-fno-plt //g')"
+        CXXFLAGS="$(echo $CXXFLAGS | sed 's/-fno-plt //g')"
+    fi
+
 fi
 
 cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
