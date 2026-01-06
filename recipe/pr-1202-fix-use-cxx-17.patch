@@ -1,5 +1,5 @@
 diff --git a/Cargo.lock b/Cargo.lock
-index db797783..490846c4 100644
+index db79778..490846c 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
 @@ -2359,6 +2359,7 @@ dependencies = [
@@ -11,7 +11,7 @@ index db797783..490846c4 100644
   "toml",
   "url",
 @@ -2682,9 +2683,9 @@ dependencies = [
-
+ 
  [[package]]
  name = "time"
 -version = "0.3.34"
@@ -23,7 +23,7 @@ index db797783..490846c4 100644
   "deranged",
   "itoa",
 @@ -2705,9 +2706,9 @@ checksum = "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
-
+ 
  [[package]]
  name = "time-macros"
 -version = "0.2.17"
@@ -35,13 +35,13 @@ index db797783..490846c4 100644
   "num-conv",
   "time-core",
 diff --git a/Cargo.toml b/Cargo.toml
-index 2bfb0c11..8f136eb7 100644
+index 2bfb0c1..8f136eb 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -27,6 +27,9 @@ license = "MIT"
  edition = "2018"
  exclude = ["/dist/", "/reference_sources/"]
-
+ 
 +[lints.rust]
 +unexpected_cfgs = { level = "warn", check-cfg = ['cfg(backtrace)'] }
 +
@@ -86,11 +86,11 @@ index 2bfb0c11..8f136eb7 100644
  watchexec-signals = "1.0"
  zip = { version = "^0.6", default-features = false, features = ["deflate"] }
 +time = "0.3.36"
-
+ 
  [features]
  default = ["geturl-reqwest", "serialization"]
 diff --git a/crates/bundles/src/cache.rs b/crates/bundles/src/cache.rs
-index 0c481b0d..4b363d84 100644
+index 0c481b0..4b363d8 100644
 --- a/crates/bundles/src/cache.rs
 +++ b/crates/bundles/src/cache.rs
 @@ -460,7 +460,7 @@ impl<CB: CacheBackend> CachingBundle<CB> {
@@ -101,7 +101,7 @@ index 0c481b0d..4b363d84 100644
 +        if !name.contains(['\n', '\r']) {
              writeln!(man, "{name} {length} {digest_text}")?;
          }
-
+ 
 @@ -515,9 +515,7 @@ impl<CB: CacheBackend> CachingBundle<CB> {
              // giving incorrect results if we pulled files out of the cache
              // before this invocation. Rewrite the digest file so that next time
@@ -112,22 +112,22 @@ index 0c481b0d..4b363d84 100644
 +            file_create_write(&self.digest_path, |f| writeln!(f, "{}", pull_data.digest))?;
              bail!("backend digest changed; rerun tectonic to use updated information");
          }
-
+ 
 diff --git a/crates/docmodel/src/document.rs b/crates/docmodel/src/document.rs
-index b91b95a1..16dc4038 100644
+index b91b95a..16dc403 100644
 --- a/crates/docmodel/src/document.rs
 +++ b/crates/docmodel/src/document.rs
 @@ -270,7 +270,7 @@ impl Document {
                  tried_src_path = true;
-
+ 
                  if let Some(s) = t.to_str() {
 -                    name = s.to_owned();
 +                    s.clone_into(&mut name);
                  }
              }
-
+ 
 @@ -280,7 +280,7 @@ impl Document {
-
+ 
                      if let Some(Component::Normal(t)) = full_path.components().next_back() {
                          if let Some(s) = t.to_str() {
 -                            name = s.to_owned();
@@ -136,11 +136,11 @@ index b91b95a1..16dc4038 100644
                      }
                  }
 diff --git a/crates/engine_spx2html/src/assets.rs b/crates/engine_spx2html/src/assets.rs
-index edd08ed6..21f73a74 100644
+index edd08ed..21f73a7 100644
 --- a/crates/engine_spx2html/src/assets.rs
 +++ b/crates/engine_spx2html/src/assets.rs
 @@ -179,7 +179,7 @@ pub(crate) fn create_output_path(
-
+ 
      for piece in dest_path.split('/') {
          if let Some(out_path) = out_path.as_mut() {
 -            match std::fs::create_dir(&out_path) {
@@ -149,11 +149,11 @@ index edd08ed6..21f73a74 100644
                  Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
                  Err(e) => {
 diff --git a/crates/engine_spx2html/src/fontfile.rs b/crates/engine_spx2html/src/fontfile.rs
-index 8455f06b..65289b10 100644
+index 8455f06..65289b1 100644
 --- a/crates/engine_spx2html/src/fontfile.rs
 +++ b/crates/engine_spx2html/src/fontfile.rs
 @@ -426,9 +426,10 @@ impl FontFileData {
-
+ 
          if let Some(out_path) = out_path.as_mut() {
              out_path.push(rel_path);
 +            let display_path = out_path.clone();
@@ -164,9 +164,9 @@ index 8455f06b..65289b10 100644
 +                ["cannot write output file `{}`", display_path.display()]
              );
          }
-
+ 
 @@ -490,9 +491,10 @@ impl FontFileData {
-
+ 
                  out_path.pop();
                  out_path.push(&varname);
 +                let display_path = out_path.clone();
@@ -177,15 +177,15 @@ index 8455f06b..65289b10 100644
 +                    ["cannot write output file `{}`", display_path.display()]
                  );
              }
-
+ 
 diff --git a/crates/engine_spx2html/src/fonts.rs b/crates/engine_spx2html/src/fonts.rs
-index a826700b..e57c383c 100644
+index a826700..e57c383 100644
 --- a/crates/engine_spx2html/src/fonts.rs
 +++ b/crates/engine_spx2html/src/fonts.rs
 @@ -197,13 +197,13 @@ impl FontEnsemble {
          // Update the info records for the relevant fonts to capture the
          // established relationship.
-
+ 
 -        self.font_files[regular].family_name = name.clone();
 +        self.font_files[regular].family_name.clone_from(&name);
          self.font_files[regular].family_relation = FamilyRelativeFontId::Regular;
@@ -198,46 +198,46 @@ index a826700b..e57c383c 100644
 -        self.font_files[bold_italic].family_name = name.clone();
 +        self.font_files[bold_italic].family_name.clone_from(&name);
          self.font_files[bold_italic].family_relation = FamilyRelativeFontId::BoldItalic;
-
+ 
          self.font_families.insert(
 diff --git a/crates/engine_spx2html/src/initialization.rs b/crates/engine_spx2html/src/initialization.rs
-index 1ec38ce3..f56508ff 100644
+index 1ec38ce..f56508f 100644
 --- a/crates/engine_spx2html/src/initialization.rs
 +++ b/crates/engine_spx2html/src/initialization.rs
 @@ -167,12 +167,12 @@ impl InitializationState {
      }
-
+ 
      fn handle_set_template(&mut self, texpath: &str, _common: &mut Common) -> Result<()> {
 -        self.next_template_path = texpath.to_owned();
 +        texpath.clone_into(&mut self.next_template_path);
          Ok(())
      }
-
+ 
      fn handle_set_output_path(&mut self, texpath: &str, _common: &mut Common) -> Result<()> {
 -        self.next_output_path = texpath.to_owned();
 +        texpath.clone_into(&mut self.next_output_path);
          Ok(())
      }
-
+ 
 diff --git a/crates/engine_xetex/build.rs b/crates/engine_xetex/build.rs
-index 992b3511..a34282b4 100644
+index 992b351..a34282b 100644
 --- a/crates/engine_xetex/build.rs
 +++ b/crates/engine_xetex/build.rs
 @@ -25,6 +25,7 @@ fn main() {
      let profile_target_requires_frame_pointer: bool =
          target_cfg!(not(all(target_os = "linux", target_arch = "x86_64")));
-
+ 
 +    #[allow(unexpected_cfgs)]
      const PROFILE_BUILD_ENABLED: bool = cfg!(feature = "profile");
-
+ 
      let profile_config = |cfg: &mut cc::Build| {
 diff --git a/crates/io_base/src/digest.rs b/crates/io_base/src/digest.rs
-index c0928dca..77672a6f 100644
+index c0928dc..77672a6 100644
 --- a/crates/io_base/src/digest.rs
 +++ b/crates/io_base/src/digest.rs
 @@ -4,7 +4,7 @@
  //! Helpers to tidy up the computation of digests in various places.
-
+ 
  use std::{
 -    fs,
 +    fmt, fs,
@@ -247,7 +247,7 @@ index c0928dca..77672a6f 100644
 @@ -104,9 +104,9 @@ impl DigestData {
      }
  }
-
+ 
 -impl ToString for DigestData {
 -    fn to_string(&self) -> String {
 -        bytes_to_hex(&self.0)
@@ -256,27 +256,27 @@ index c0928dca..77672a6f 100644
 +        write!(f, "{}", bytes_to_hex(&self.0))
      }
  }
-
+ 
 diff --git a/crates/xdv/src/lib.rs b/crates/xdv/src/lib.rs
-index 4acfb526..1c0f2882 100644
+index 4acfb52..1c0f288 100644
 --- a/crates/xdv/src/lib.rs
 +++ b/crates/xdv/src/lib.rs
 @@ -1229,7 +1229,7 @@ impl<'a, T: XdvEvents> Cursor<'a, T> {
              return Err(InternalError::NeedMoreData);
          }
-
+ 
 -        let rv = unsafe { mem::transmute(self.buf[0]) };
 +        let rv = unsafe { mem::transmute::<u8, i8>(self.buf[0]) };
          self.buf = &self.buf[1..];
          self.offset += 1;
          Ok(rv)
 diff --git a/crates/xetex_layout/build.rs b/crates/xetex_layout/build.rs
-index bdd0d03f..558fd29e 100644
+index bdd0d03..558fd29 100644
 --- a/crates/xetex_layout/build.rs
 +++ b/crates/xetex_layout/build.rs
 @@ -86,7 +86,7 @@ fn main() {
      let mut cppcfg = cc::Build::new();
-
+ 
      let cppflags = [
 -        "-std=c++14",
 +        "-std=c++17",
@@ -284,20 +284,20 @@ index bdd0d03f..558fd29e 100644
          "-Wdate-time",
          "-Wendif-labels",
 diff --git a/src/driver.rs b/src/driver.rs
-index 504acd28..b9041c16 100644
+index 504acd2..b9041c1 100644
 --- a/src/driver.rs
 +++ b/src/driver.rs
 @@ -1132,7 +1132,7 @@ impl ProcessingSessionBuilder {
                      }
                  };
-
+ 
 -                filesystem_root = parent.clone();
 +                filesystem_root.clone_from(&parent);
                  let pio: Box<dyn IoProvider> = Box::new(FilesystemPrimaryInputIo::new(&p));
                  (pio, Some(p), parent)
              }
 diff --git a/src/io/format_cache.rs b/src/io/format_cache.rs
-index dbb4e182..2b02fe1f 100644
+index dbb4e18..2b02fe1 100644
 --- a/src/io/format_cache.rs
 +++ b/src/io/format_cache.rs
 @@ -55,7 +55,7 @@ impl FormatCache {
@@ -310,12 +310,12 @@ index dbb4e182..2b02fe1f 100644
              crate::FORMAT_SERIAL
          ));
 diff --git a/tests/formats.rs b/tests/formats.rs
-index 75682ccb..d55d1793 100644
+index 75682cc..d55d179 100644
 --- a/tests/formats.rs
 +++ b/tests/formats.rs
 @@ -177,12 +177,8 @@ fn test_format_generation(texname: &str, fmtname: &str, sha256: &str) {
              let observed = info.write_digest.unwrap();
-
+ 
              if observed != want_digest {
 -                println!(
 -                    "expected {} to have SHA256 = {}",
@@ -329,15 +329,15 @@ index 75682ccb..d55d1793 100644
              }
          }
 diff --git a/tests/util/mod.rs b/tests/util/mod.rs
-index 711a27e0..eb64bfd0 100644
+index 711a27e..eb64bfd 100644
 --- a/tests/util/mod.rs
 +++ b/tests/util/mod.rs
 @@ -169,7 +169,7 @@ impl<'a> ExpectedFile<'a> {
          pbase.set_extension(extension);
          let name = pbase.file_name().unwrap().to_str().unwrap().to_owned();
-
+ 
 -        let mut dec = GzDecoder::new(File::open(&pbase).unwrap());
 +        let mut dec = GzDecoder::new(File::open(pbase.as_path()).unwrap());
          let mut contents = Vec::new();
          dec.read_to_end(&mut contents).unwrap();
-
+ 
