@@ -1,5 +1,5 @@
 diff --git a/crates/engine_bibtex/src/xbuf.rs b/crates/engine_bibtex/src/xbuf.rs
-index 8f3949e7..c216eb4d 100644
+index 8f3949e..c216eb4 100644
 --- a/crates/engine_bibtex/src/xbuf.rs
 +++ b/crates/engine_bibtex/src/xbuf.rs
 @@ -52,7 +52,7 @@ pub unsafe fn xrealloc_zeroed<T: SafelyZero>(
