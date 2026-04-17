@@ -10,11 +10,6 @@ package:
 source:
   url: https://github.com/tectonic-typesetting/${{ name }}/archive/refs/tags/${{ name }}@${{ version }}.tar.gz
   sha256: ${{ sha256 }}
-  patches:
-    - pr-1202-fix-use-cxx-17.patch
-    - fix-autoref.patch
-    - if: win
-      then: winzip.patch
 
 build:
   number: 0
