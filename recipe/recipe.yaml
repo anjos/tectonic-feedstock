@@ -1,7 +1,7 @@
 context:
   name: tectonic
-  version: "0.16.6"
-  sha256: fb6dd2c3844df2682bcd8d768e3c8298f0704788d8fc15defe04c74c9e39ebac
+  version: "0.16.9"
+  sha256: 9861d4d4230b987d8560f1b84fe6c8a550738401be65b9425b0c7d0466178f2b
 
 package:
   name: ${{ name|lower }}
