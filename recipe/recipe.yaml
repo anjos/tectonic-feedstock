@@ -61,7 +61,15 @@ tests:
         - example.tex
     script:
       - tectonic --help
-      - tectonic example.tex
+      - if: win
+        then:
+          # Rattler's build isolation forces USERPROFILE to %SRC_DIR% which causes
+          # the SHGetFolderPath system call to fail, leading to the message
+          # "error: App data directories not supported". This also triggers some
+          # errors in bld.bat but they're not fatal.
+          - SET "USERPROFILE=%HOMEDRIVE%%HOMEPATH%" & tectonic example.tex
+        else:
+          tectonic example.tex
 
 about:
   license: MIT
