@@ -12,8 +12,5 @@ set RUST_TEST_THREADS=1
 cargo test --release --features external-harfbuzz
 if errorlevel 1 exit 1
 
-cargo install --path . --bin tectonic --root %LIBRARY_PREFIX% --features external-harfbuzz
+cargo install --no-track --locked --path . --bin tectonic --root %LIBRARY_PREFIX% --features external-harfbuzz
 if errorlevel 1 exit 1
-
-del %LIBRARY_PREFIX%\.crates.toml
-del %LIBRARY_PREFIX%\.crates2.json
